@@ -93,10 +93,10 @@ void Robot::updateSensors()
     lastEncoder[1] = encoder[1];
 
     /* Get the encoder data */
-    if (sim->getJointPosition(motorHandle[0], &encoder[0]) == 1)
-        std::cout << "ok left enconder"<< encoder[0] << std::endl;  // left
-    if (sim->getJointPosition(motorHandle[1], &encoder[1]) == 1)
-        std::cout << "ok right enconder"<< encoder[1] << std::endl;  // right
+    if (sim->getJointPosition(motorHandle[0], &encoder[0]) == 1);
+        //std::cout << "ok left enconder"<< encoder[0] << std::endl;  // left
+    if (sim->getJointPosition(motorHandle[1], &encoder[1]) == 1);
+        //std::cout << "ok right enconder"<< encoder[1] << std::endl;  // right
 
 }
 
@@ -118,9 +118,11 @@ void Robot::writeGT() {
      *              encoder[0] encoder[1] lastEncoder[0] lastEncoder[1] */
 
     if (LOG) {
+
         FILE *data =  fopen("gt.txt", "at");
         if (data!=NULL)
         {
+                 std::cout << "ansdbashdgha" << std::endl;
             for (int i=0; i<3; ++i)
                 fprintf(data, "%.2f\t",robotPosition[i]);
             for (int i=0; i<3; ++i)
