@@ -28,6 +28,7 @@ public:
     double vLToDrive(double vLinear, double vAngular);
     void drive(double vLinear, double vAngular);
     void stop();
+    void check();
 private:
     const float L = 0.381;                                   // distance between wheels
     const float R = 0.0975;                                  // wheel radius

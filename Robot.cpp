@@ -3,6 +3,10 @@
 Robot::Robot(Simulator *sim, std::string name) {
     this->sim = sim;
     this->name = name;
+
+    this->velocity[0] = 10;
+    this->velocity[1] = 10;
+
     handle = sim->getHandle(name);
 
     if (LOG) {
@@ -39,6 +43,9 @@ Robot::Robot(Simulator *sim, std::string name) {
         {
             std::cout << "Connected to sensor\n";
         }
+
+        //init sensors
+        sim->readProximitySensor(sonarHandle[i],NULL,NULL,0);
     }
 
     /* Get the robot current absolute position */
@@ -62,13 +69,36 @@ Robot::Robot(Simulator *sim, std::string name) {
 }
 
 void Robot::update() {
-    drive(10,5);
+    drive(this->velocity[0],this->velocity[1]);
     updateSensors();
     updatePose();
+    check();
+}
+
+void:: Robot::check()
+{
+    for (int i=0; i<NUM_SONARS; ++i){
+        if(sonarReadings[i] < 1 && sonarReadings[i] > 0){
+            if(i == 6 || i == 7 || i == 8){
+
+                this->velocity[0] = 5;
+                this->velocity[1] = 30;
+            }
+            else if(i == 2 || i == 3 || i == 4){
+                this->velocity[0] = 30;
+                this->velocity[1] = 5;
+            }else{
+
+                this->velocity[0] = 10;
+                this->velocity[1] = 10;
+            }
+        }
+    }
 }
 
 void Robot::updateSensors()
 {
+
     /* Update sonars */
     for(int i = 0; i < NUM_SONARS; i++)
     {
@@ -80,7 +110,7 @@ void Robot::updateSensors()
         /* read the proximity sensor
          * detectionState: pointer to the state of detection (0=nothing detected)
          * detectedPoint: pointer to the coordinates of the detected point (relative to the frame of reference of the sensor) */
-        if (sim->readProximitySensor(sonarHandle[i],&state,coord)==1)
+        if (sim->readProximitySensor(sonarHandle[i],&state,coord,1)==1)
         {
             if(state > 0)
                 sonarReadings[i] = coord[2];
@@ -88,6 +118,7 @@ void Robot::updateSensors()
                 sonarReadings[i] = -1;
         }
     }
+
     /* Update encoder data */
     lastEncoder[0] = encoder[0];
     lastEncoder[1] = encoder[1];
@@ -122,7 +153,6 @@ void Robot::writeGT() {
         FILE *data =  fopen("gt.txt", "at");
         if (data!=NULL)
         {
-                 std::cout << "ansdbashdgha" << std::endl;
             for (int i=0; i<3; ++i)
                 fprintf(data, "%.2f\t",robotPosition[i]);
             for (int i=0; i<3; ++i)
