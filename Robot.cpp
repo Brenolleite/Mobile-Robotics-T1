@@ -77,23 +77,30 @@ void Robot::update() {
 
 void:: Robot::check()
 {
+    int min = 999;
+    int minIndex = 0;
+
     for (int i=0; i<NUM_SONARS; ++i){
-        if(sonarReadings[i] < 1 && sonarReadings[i] > 0){
-            if(i == 6 || i == 7 || i == 8){
-
-                this->velocity[0] = 5;
-                this->velocity[1] = 30;
-            }
-            else if(i == 2 || i == 3 || i == 4){
-                this->velocity[0] = 30;
-                this->velocity[1] = 5;
-            }else{
-
-                this->velocity[0] = 10;
-                this->velocity[1] = 10;
-            }
+        if (sonarReadings[i] < min && min > 0){
+            min = sonarReadings[i];
+            minIndex = i;
         }
     }
+
+    if(min < 1){
+        if(minIndex == 6 || minIndex == 7 || minIndex == 8){
+            this->velocity[0] = 5;
+            this->velocity[1] = 30;
+        }
+        else if(minIndex == 2 || minIndex == 3 || minIndex == 4){
+            this->velocity[0] = 30;
+            this->velocity[1] = 5;
+        }
+    }else{
+        this->velocity[0] = 30;
+        this->velocity[1] = 0;
+    }
+
 }
 
 void Robot::updateSensors()
