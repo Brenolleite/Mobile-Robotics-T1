@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
     robot = new Robot(vrep, "Pioneer_p3dx");
 
-    for (int i=0; i<3000; ++i)
+    for (int i=0; i<30000; ++i)
     {
         //std::cout << "Here we go... " << i << std::endl;
         robot->update();

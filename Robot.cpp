@@ -77,55 +77,24 @@ void Robot::update() {
 
 void:: Robot::check()
 {
-  float min = 999.0;
-  int minIndex = 0;
 
-  for (int i = 0; i < 8; ++i)
-  {
-    std::cout << i+1 << "\t" << sonarReadings[i] << std::endl;
-
-    if (sonarReadings[i] < min && sonarReadings[i] > 0.0)
-    {
-      min = sonarReadings[i];
-      minIndex = i;
-    }
-  }
-
-  std::cout << "\n";
-
-  if(min < 1.0 && min > 0.0)
-  {
-    if(minIndex == 6 || minIndex == 7 || minIndex == 8)
-    {
-      std::cout << "Turning left\n";
-      // X: Sensor's id number in the simulation
-      // Y: Sensor's reading
-      // i: Sensor id number in the sonar array
-      // X: Y[i]
-      std::cout << "5: " << sonarReadings[6] << std::endl;
-      std::cout << "6: " << sonarReadings[7] << std::endl;
-      std::cout << "7: " << sonarReadings[8] << std::endl;
-
-      this->velocity[0] = 0;
-      this->velocity[1] = 15;
-    }
-    else if(minIndex == 1 || minIndex == 2 || minIndex == 3)
-    {
-      std::cout << "Turning right\n";
-      std::cout << "2: " << sonarReadings[1] << std::endl;
-      std::cout << "3: " << sonarReadings[2] << std::endl;
-      std::cout << "4: " << sonarReadings[3] << std::endl;
-
-      this->velocity[0] = 0;
-      this->velocity[1] = -15;
-    }
-  }else{
-    std::cout << "Straight line\n";
-
-    this->velocity[0] = 20;
+    this->velocity[0] = 40;
     this->velocity[1] = 0;
-  }
+    float angle[8] = {-10.0,-20.0,-10.0,-10.0,10.0,10.0,20.0,10.0};
+    for(int i = 0; i < 8; i++)
+    {
+        if(sonarReadings[i] > 0 && sonarReadings[i] < 0.3){
+            this->velocity[0] = 0;
+            this->velocity[1] += angle[i];
+        }
+    }
+
+    if(this->velocity[0] == 0 && this->velocity[1] == 0){
+        this->velocity[1] = 30;
+    }
+
 }
+
 
 void Robot::updateSensors()
 {
