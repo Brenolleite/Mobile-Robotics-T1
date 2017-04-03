@@ -16,6 +16,9 @@ Robot::Robot(Simulator *sim, std::string name) {
     data =  fopen("sonar.txt", "wt");
     if (data!=NULL)
       fclose(data);
+    data =  fopen("points.txt", "wt");
+    if (data!=NULL)
+      fclose(data);
   }
 
   /* Get handles of sensors and actuators */
@@ -63,9 +66,8 @@ Robot::Robot(Simulator *sim, std::string name) {
   /* Get the encoder data */
   sim->getJointPosition(motorHandle[0],&encoder[0]);
   sim->getJointPosition(motorHandle[1],&encoder[1]);
-  std::cout << encoder[0] << std::endl;
-  std::cout << encoder[1] << std::endl;
-
+  //std::cout << encoder[0] << std::endl;
+  //std::cout << encoder[1] << std::endl;
 }
 
 void Robot::update() {
@@ -77,7 +79,6 @@ void Robot::update() {
 
 void:: Robot::check()
 {
-
     this->velocity[0] = 40;
     this->velocity[1] = 0;
     float angle[8] = {-10.0,-20.0,-10.0,-10.0,10.0,10.0,20.0,10.0};
@@ -93,9 +94,7 @@ void:: Robot::check()
     if(this->velocity[0] == 0 && this->velocity[1] == 0){
         this->velocity[1] = 30;
     }
-
 }
-
 
 void Robot::updateSensors()
 {
@@ -126,9 +125,9 @@ void Robot::updateSensors()
 
   /* Get the encoder data */
   if (sim->getJointPosition(motorHandle[0], &encoder[0]) == 1);
-  //std::cout << "ok left enconder"<< encoder[0] << std::endl;  // left
+  //      std::cout << "ok left enconder"<< encoder[0] << std::endl;  // left
   if (sim->getJointPosition(motorHandle[1], &encoder[1]) == 1);
-  //std::cout << "ok right enconder"<< encoder[1] << std::endl;  // right
+  //  std::cout << "ok right enconder"<< encoder[1] << std::endl;  // right
 
 }
 
@@ -189,6 +188,26 @@ void Robot::writeSonars() {
         fflush(data);
         fclose(data);
       }
+    }
+  }
+}
+
+void Robot::writePointsPerSonars() {
+  float x, y;
+  if (LOG) {
+    FILE *data =  fopen("points.txt", "at");
+
+    if (data!=NULL){
+      // Somente 1 sonar por enquanto, para testes
+      for (int i=4; i<5; ++i){
+        if(sonarReadings[i] > 0){
+          x = robotPosition[0] + (sonarReadings[i] + RAIO) * cos(robotOrientation[0] + (sonarAngles[i]*PI)/180);
+          y = robotPosition[1] + (sonarReadings[i] + RAIO) * sin(robotOrientation[0] + (sonarAngles[i]*PI)/180);
+          fprintf(data, "%.4f \t %.4f \n", x, y);
+        }
+      }
+      fflush(data);
+      fclose(data);
     }
   }
 }

@@ -3,10 +3,13 @@
 
 #define NUM_SONARS  16
 #define LOG         1
+#define RAIO        0.0975
+#define PI          3.14159
 
 #include <fstream>
 #include <iostream>
 #include "Simulator.h"
+#include <math.h>
 
 extern "C" {
    #include "extApi.h"
@@ -29,6 +32,7 @@ public:
     void drive(double vLinear, double vAngular);
     void stop();
     void check();
+    void writePointsPerSonars();
 private:
     const float L = 0.381;                                   // distance between wheels
     const float R = 0.0975;                                  // wheel radius
@@ -49,7 +53,7 @@ private:
     float initialPose[3] = {0,0,0};
     simxFloat robotLastPosition[3] = {0,0,0};                // last robot position
     float sonarReadings[NUM_SONARS];
-
+    int sonarAngles[8] = {90, 50, 30, 10, -10, -30, -50, -90};
 };
 
 #endif // ROBOT_H
