@@ -199,10 +199,10 @@ void Robot::writePointsPerSonars() {
 
     if (data!=NULL){
       // Somente 1 sonar por enquanto, para testes
-      for (int i=4; i<5; ++i){
+      for (int i=0; i<8; ++i){
         if(sonarReadings[i] > 0){
-          x = robotPosition[0] + (sonarReadings[i] + RAIO) * cos(robotOrientation[0] + (sonarAngles[i]*PI)/180);
-          y = robotPosition[1] + (sonarReadings[i] + RAIO) * sin(robotOrientation[0] + (sonarAngles[i]*PI)/180);
+          x = robotPosition[0] + (sonarReadings[i] + RAIO) * cos(robotOrientation[2] + (sonarAngles[i]*PI)/180);
+          y = robotPosition[1] + (sonarReadings[i] + RAIO) * sin(robotOrientation[2] + (sonarAngles[i]*PI)/180);
           fprintf(data, "%.4f \t %.4f \n", x, y);
         }
       }
