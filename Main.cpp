@@ -17,17 +17,16 @@ int main(int argc, char *argv[])
         std::cout << "Failed to Connect" << std::endl;
         return 0;
     }
-
+ 
     robot = new Robot(vrep, "Pioneer_p3dx");
 
     for (int i=0; i<30000; ++i)
     {
-        //std::cout << "Here we go... " << i << std::endl;
         robot->update();
         robot->writeGT();
         //robot->writeSonars();
-        if(i%5 == 0)
-          robot->writePointsPerSonars();
+        //if(i % 50 == 0)
+        robot->writePointsPerSonars();
         extApi_sleepMs(50);
     }
     vrep->disconnect();

@@ -6,10 +6,20 @@
 #define RAIO        0.0975
 #define PI          3.14159
 
+// Settings to average filters
+#define AVR_FILTER 1
+#define POINTS_PER_AVR 4
+#define MAX_DISTANCE 0.5
+
 #include <fstream>
 #include <iostream>
 #include "Simulator.h"
 #include <math.h>
+
+typedef struct filter{
+  float sum_x, sum_y, last_x, last_y;
+  int count;
+} avr_filter;
 
 extern "C" {
    #include "extApi.h"
@@ -31,7 +41,6 @@ public:
     double vLToDrive(double vLinear, double vAngular);
     void drive(double vLinear, double vAngular);
     void stop();
-    void check();
     void writePointsPerSonars();
 private:
     const float L = 0.381;                                   // distance between wheels
@@ -54,6 +63,13 @@ private:
     simxFloat robotLastPosition[3] = {0,0,0};                // last robot position
     float sonarReadings[NUM_SONARS];
     int sonarAngles[8] = {90, 50, 30, 10, -10, -30, -50, -90};
+    avr_filter sonarAvrFilters[NUM_SONARS];
+
+
+    // Private functions
+    void check();
+    void initAvrFilter();
+    int  averageFilter(int i, float *x, float *y);
 };
 
 #endif // ROBOT_H
