@@ -260,23 +260,57 @@ void Robot::initAvrFilter(){
   }
 }
 
-int Robot::averageFilter(int i, float *x, float *y){
-  // Atualiza valores das structures 
-  sonarAvrFilters[i].last_x = *x;
-  sonarAvrFilters[i].last_y = *y;
+float Robot::euclideanDistance(float x1, float y1, float x2, float y2){
+  return sqrt((x1*x1 - x2*x2) + (y1*y1 - y2*y2));
+}
 
-  sonarAvrFilters[i].sum_x += *x;
-  sonarAvrFilters[i].sum_y += *y;
+int Robot::checkAverageDistance(int i, float x, float y){
+  float avr_x, avr_y;
   
-  // Verifica se deve escrever a média desses pontos
-  if(sonarAvrFilters[i].count++ == POINTS_PER_AVR){
-    *x = sonarAvrFilters[i].sum_x/POINTS_PER_AVR;
-    *y = sonarAvrFilters[i].sum_y/POINTS_PER_AVR;
+  if(sonarAvrFilters[i].count == 0)
+    return 1;
+ 
+  avr_x =  sonarAvrFilters[i].sum_x/sonarAvrFilters[i].count;
+  avr_y =  sonarAvrFilters[i].sum_y/sonarAvrFilters[i].count;
+  
+  // Caso a distancia seja menor que a permitida para media retorna 1
+  return (euclideanDistance(avr_x, avr_y, x, y) < MAX_DISTANCE);
+}
+
+int Robot::averageFilter(int i, float *x, float *y){
+  avr_filter sonarFilter = sonarAvrFilters[i];
+
+  // Se ja foi ignorado muitos pontos por esse sonar reseta o mesmo
+  if(sonarFilter.avrPointsIgnored == MAX_IGNORED){
+    *x = sonarFilter.sum_x/sonarFilter.count;
+    *y = sonarFilter.sum_y/sonarFilter.count;
     
-    sonarAvrFilters[i].count = 0;
-    
+    sonarFilter.count =  sonarFilter.sum_y = sonarFilter.sum_x = 0;
+
+    sonarFilter.avrPointsIgnored = 0;
+
     return 1;
   }
+       
+
+  if(checkAverageDistance(i, *x, *y)){
+     sonarFilter.sum_x += *x;
+     sonarFilter.sum_y += *y;
   
-  return 0; 
+     // Verifica se deve escrever a média desses pontos
+     if(sonarFilter.count++ == POINTS_PER_AVR){
+       *x = sonarFilter.sum_x/POINTS_PER_AVR;
+       *y = sonarFilter.sum_y/POINTS_PER_AVR;
+       
+       sonarFilter.count =  sonarFilter.sum_y = sonarFilter.sum_x = 0;
+       
+       return 1;
+     }
+  } 
+  else{
+    sonarFilter.avrPointsIgnored++;
+  }
+
+ 
+  return 0;
 }

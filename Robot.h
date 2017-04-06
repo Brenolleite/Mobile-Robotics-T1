@@ -8,8 +8,9 @@
 
 // Settings to average filters
 #define AVR_FILTER 1
-#define POINTS_PER_AVR 4
+#define POINTS_PER_AVR 20
 #define MAX_DISTANCE 0.5
+#define MAX_IGNORED 5
 
 #include <fstream>
 #include <iostream>
@@ -17,8 +18,8 @@
 #include <math.h>
 
 typedef struct filter{
-  float sum_x, sum_y, last_x, last_y;
-  int count;
+  float sum_x, sum_y;
+  int count, avrPointsIgnored;
 } avr_filter;
 
 extern "C" {
@@ -65,11 +66,12 @@ private:
     int sonarAngles[8] = {90, 50, 30, 10, -10, -30, -50, -90};
     avr_filter sonarAvrFilters[NUM_SONARS];
 
-
     // Private functions
     void check();
     void initAvrFilter();
     int  averageFilter(int i, float *x, float *y);
+    float euclideanDistance(float x1, float y1, float x2, float y2);
+    int checkAverageDistance(int i, float x, float y);
 };
 
 #endif // ROBOT_H

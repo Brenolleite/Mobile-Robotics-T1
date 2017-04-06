@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
         robot->update();
         robot->writeGT();
         //robot->writeSonars();
-        //if(i % 50 == 0)
-        robot->writePointsPerSonars();
+        //if(i % 30 == 0)
+          robot->writePointsPerSonars();
         extApi_sleepMs(50);
     }
     vrep->disconnect();
