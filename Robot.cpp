@@ -278,37 +278,41 @@ int Robot::checkAverageDistance(int i, float x, float y){
 }
 
 int Robot::averageFilter(int i, float *x, float *y){
-  avr_filter sonarFilter = sonarAvrFilters[i];
+  avr_filter *sonarFilter = &sonarAvrFilters[i];
 
   // Se ja foi ignorado muitos pontos por esse sonar reseta o mesmo
-  if(sonarFilter.avrPointsIgnored == MAX_IGNORED){
-    *x = sonarFilter.sum_x/sonarFilter.count;
-    *y = sonarFilter.sum_y/sonarFilter.count;
+  if(sonarFilter->avrPointsIgnored == MAX_IGNORED && MAX_DISTANCE){
+    *x = sonarFilter->sum_x/sonarFilter->count;
+    *y = sonarFilter->sum_y/sonarFilter->count;
     
-    sonarFilter.count =  sonarFilter.sum_y = sonarFilter.sum_x = 0;
+    sonarFilter->count =  sonarFilter->sum_y = sonarFilter->sum_x = 0;
 
-    sonarFilter.avrPointsIgnored = 0;
+    sonarFilter->avrPointsIgnored = 0;
 
     return 1;
   }
-       
-
-  if(checkAverageDistance(i, *x, *y)){
-     sonarFilter.sum_x += *x;
-     sonarFilter.sum_y += *y;
   
-     // Verifica se deve escrever a média desses pontos
-     if(sonarFilter.count++ == POINTS_PER_AVR){
-       *x = sonarFilter.sum_x/POINTS_PER_AVR;
-       *y = sonarFilter.sum_y/POINTS_PER_AVR;
-       
-       sonarFilter.count =  sonarFilter.sum_y = sonarFilter.sum_x = 0;
-       
-       return 1;
-     }
+  /*
+    MAX_DISTANCE = 0 desliga ignoramento de pontos
+    por distancia euclidiana
+  */
+
+  if(!MAX_DISTANCE || checkAverageDistance(i, *x, *y)){
+    sonarFilter->sum_x += *x;
+    sonarFilter->sum_y += *y;
+  
+    // Verifica se deve escrever a média desses pontos
+    if(sonarFilter->count++ == POINTS_PER_AVR){
+      *x = sonarFilter->sum_x/POINTS_PER_AVR;
+      *y = sonarFilter->sum_y/POINTS_PER_AVR;
+      
+      sonarFilter->count =  sonarFilter->sum_y = sonarFilter->sum_x = 0;
+      
+      return 1;
+    }
   } 
   else{
-    sonarFilter.avrPointsIgnored++;
+    sonarFilter->avrPointsIgnored++;
   }
 
  

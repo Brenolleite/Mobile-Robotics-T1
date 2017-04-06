@@ -7,10 +7,10 @@
 #define PI          3.14159
 
 // Settings to average filters
-#define AVR_FILTER 1
-#define POINTS_PER_AVR 20
-#define MAX_DISTANCE 0.5
-#define MAX_IGNORED 5
+#define AVR_FILTER 0
+#define POINTS_PER_AVR 5
+#define MAX_DISTANCE 0
+#define MAX_IGNORED 0
 
 #include <fstream>
 #include <iostream>
