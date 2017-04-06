@@ -68,6 +68,9 @@ Robot::Robot(Simulator *sim, std::string name) {
   sim->getJointPosition(motorHandle[1],&encoder[1]);
   //std::cout << encoder[0] << std::endl;
   //std::cout << encoder[1] << std::endl;
+
+  // Initialization of average filter
+  initAvrFilter();
 }
 
 void Robot::update() {
@@ -194,18 +197,25 @@ void Robot::writeSonars() {
 
 void Robot::writePointsPerSonars() {
   float x, y;
+  int write = 1;
   if (LOG) {
     FILE *data =  fopen("points.txt", "at");
 
     if (data!=NULL){
-      // Somente 1 sonar por enquanto, para testes
       for (int i=0; i<8; ++i){
         if(sonarReadings[i] > 0){
           x = robotPosition[0] + (sonarReadings[i] + RAIO) * cos(robotOrientation[2] + (sonarAngles[i]*PI)/180);
           y = robotPosition[1] + (sonarReadings[i] + RAIO) * sin(robotOrientation[2] + (sonarAngles[i]*PI)/180);
-          fprintf(data, "%.4f \t %.4f \n", x, y);
+          
+          if(AVR_FILTER)
+            write = averageFilter(i, &x, &y);
+
+          // verifica se deve escrever no arquivo
+          if(write)
+            fprintf(data, "%.4f \t %.4f \n", x, y);
         }
       }
+      
       fflush(data);
       fclose(data);
     }
@@ -240,5 +250,71 @@ double Robot::vRToDrive(double vLinear, double vAngular)
 double Robot::vLToDrive(double vLinear, double vAngular)
 {
   return (((2*vLinear)-(L*vAngular))/2*R);
+}
 
+void Robot::initAvrFilter(){
+  int i;
+  for(i = 0; i < NUM_SONARS; i++){
+    sonarAvrFilters[i].sum_y = sonarAvrFilters[i].sum_x = 0;
+    sonarAvrFilters[i].count = 0;
+  }
+}
+
+float Robot::euclideanDistance(float x1, float y1, float x2, float y2){
+  return sqrt((x1*x1 - x2*x2) + (y1*y1 - y2*y2));
+}
+
+int Robot::checkAverageDistance(int i, float x, float y){
+  float avr_x, avr_y;
+  
+  if(sonarAvrFilters[i].count == 0)
+    return 1;
+ 
+  avr_x =  sonarAvrFilters[i].sum_x/sonarAvrFilters[i].count;
+  avr_y =  sonarAvrFilters[i].sum_y/sonarAvrFilters[i].count;
+  
+  // Caso a distancia seja menor que a permitida para media retorna 1
+  return (euclideanDistance(avr_x, avr_y, x, y) < MAX_DISTANCE);
+}
+
+int Robot::averageFilter(int i, float *x, float *y){
+  avr_filter *sonarFilter = &sonarAvrFilters[i];
+
+  // Se ja foi ignorado muitos pontos por esse sonar reseta o mesmo
+  if(sonarFilter->avrPointsIgnored == MAX_IGNORED && MAX_DISTANCE){
+    *x = sonarFilter->sum_x/sonarFilter->count;
+    *y = sonarFilter->sum_y/sonarFilter->count;
+    
+    sonarFilter->count =  sonarFilter->sum_y = sonarFilter->sum_x = 0;
+
+    sonarFilter->avrPointsIgnored = 0;
+
+    return 1;
+  }
+  
+  /*
+    MAX_DISTANCE = 0 desliga ignoramento de pontos
+    por distancia euclidiana
+  */
+
+  if(!MAX_DISTANCE || checkAverageDistance(i, *x, *y)){
+    sonarFilter->sum_x += *x;
+    sonarFilter->sum_y += *y;
+  
+    // Verifica se deve escrever a média desses pontos
+    if(sonarFilter->count++ == POINTS_PER_AVR){
+      *x = sonarFilter->sum_x/POINTS_PER_AVR;
+      *y = sonarFilter->sum_y/POINTS_PER_AVR;
+      
+      sonarFilter->count =  sonarFilter->sum_y = sonarFilter->sum_x = 0;
+      
+      return 1;
+    }
+  } 
+  else{
+    sonarFilter->avrPointsIgnored++;
+  }
+
+ 
+  return 0;
 }
