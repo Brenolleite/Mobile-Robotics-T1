@@ -84,8 +84,8 @@ void:: Robot::check()
 {
     this->velocity[0] = 40;
     this->velocity[1] = 0;
-    float angle[8] = {-10.0,-20.0,-10.0,-10.0,10.0,10.0,20.0,10.0};
-    float minDist[8] = {0.2,0.3,0.3,0.3,0.3,0.3,0.3,0.2};
+    float angle[8] = {-30.0,-30.0,-30.0,-30.0,30.0,30.0,30.0,30.0};
+    float minDist[8] = {0.1,0.2,0.3,0.3,0.3,0.3,0.2,0.1};
     for(int i = 0; i < 8; i++)
     {
         if(sonarReadings[i] > 0 && sonarReadings[i] < minDist[i]){
