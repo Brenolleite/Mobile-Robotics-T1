@@ -65,6 +65,7 @@ private:
     float sonarReadings[NUM_SONARS];
     int sonarAngles[8] = {90, 50, 30, 10, -10, -30, -50, -90};
     avr_filter sonarAvrFilters[NUM_SONARS];
+    int stuck_count = 0;
 
     // Private functions
     void check();

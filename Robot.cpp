@@ -82,21 +82,37 @@ void Robot::update() {
 
 void:: Robot::check()
 {
-    this->velocity[0] = 40;
-    this->velocity[1] = 0;
-    float angle[8] = {-30.0,-30.0,-30.0,-30.0,30.0,30.0,30.0,50.0};
-    float minDist[8] = {0.1,0.2,0.3,0.3,0.3,0.3,0.2,0.1};
-    for(int i = 0; i < 8; i++)
-    {
-        if(sonarReadings[i] > 0 && sonarReadings[i] < minDist[i]){
-            this->velocity[0] = 0;
-            this->velocity[1] += angle[i];
-        }
+  float dist = euclideanDistance(robotLastPosition[0], robotLastPosition[1], robotPosition[0], robotPosition[1]);
+    
+  this->velocity[0] = 40;
+  this->velocity[1] = 0;
+  float angle[8] = {-30.0,-30.0,-30.0,-30.0,30.0,30.0,30.0,30.0};
+  float minDist[8] = {0.1,0.2,0.3,0.3,0.3,0.3,0.2,0.1};
+  for(int i = 0; i < 8; i++)
+  {
+    if(sonarReadings[i] > 0 && sonarReadings[i] < minDist[i]){
+      this->velocity[0] = 0;
+      this->velocity[1] += angle[i];
     }
+  }
+  
+  
+  // Stuck rotation
+  if(dist < 0.00001){
+    stuck_count++;
+    if(stuck_count == 1000000){
+      while(sonarReadings[3] < minDist[3])
+        this->velocity[1] += 130;
+      
+      stuck_count = 0;
+    }
+  } else{
+    stuck_count = 0;
+  }
 
-    if(this->velocity[0] == 0 && this->velocity[1] == 0){
-        this->velocity[1] = 30;
-    }
+  if(this->velocity[0] == 0 && this->velocity[1] == 0){
+    this->velocity[1] = 30;
+  }
 }
 
 void Robot::updateSensors()
@@ -261,7 +277,7 @@ void Robot::initAvrFilter(){
 }
 
 float Robot::euclideanDistance(float x1, float y1, float x2, float y2){
-  return sqrt((x1*x1 - x2*x2) + (y1*y1 - y2*y2));
+  return sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
 }
 
 int Robot::checkAverageDistance(int i, float x, float y){
