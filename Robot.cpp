@@ -98,14 +98,16 @@ void:: Robot::check()
   
   
   // Stuck rotation
-  if(dist < 0.00001){
+  if(dist < 0.0009){
     stuck_count++;
-    if(stuck_count == 1000000){
-      while(sonarReadings[3] < minDist[3])
-        this->velocity[1] += 130;
-      
-      stuck_count = 0;
+
+    if(stuck_count == 200){
+      this->velocity[1] = 130;
+      extApi_sleepMs(200);
     }
+      
+    stuck_count = 0;
+   
   } else{
     stuck_count = 0;
   }
